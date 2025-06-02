@@ -4,8 +4,8 @@ const JWT_SECRET = process.env.JWT_SECRET || 'API&ServicesDevelopment';
 
 // Apenas para exemplo de auth sem registro de usuários
 const usuarioFake = {
-  username: 'root',
-  password: '1234'
+  username: process.env.USER,
+  password: process.env.PASSWORD
 };
 
 export function autenticarUsuario(username, password) {

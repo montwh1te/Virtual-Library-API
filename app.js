@@ -28,6 +28,8 @@ app.use('/emprestimos', autenticar, emprestimoRoutes);
 // Rota de resposta rápida.
 app.get('/', (req, res) => res.send('API Biblioteca rodando!'));
 
+export default app;
+
 const PORT = process.env.PORT || 3000;
 app.listen(port, () => {
   console.log(`API running on port ${port}`)
