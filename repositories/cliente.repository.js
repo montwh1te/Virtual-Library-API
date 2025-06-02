@@ -1,4 +1,7 @@
-let clientes = [];
+let clientes = [
+  { matricula: '20230001', nome: 'João Silva', telefone: '11999999999' },
+  { matricula: '20230002', nome: 'Maria Souza', telefone: '21988888888' }
+];
 
 export function getAll() {
   return clientes;

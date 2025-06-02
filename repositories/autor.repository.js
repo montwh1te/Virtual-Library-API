@@ -1,5 +1,10 @@
-let autores = [];
-let idCounter = 1;
+let autores = [
+  { id: 1, nome: 'Machado de Assis', pais: 'Brasil' },
+  { id: 2, nome: 'J.K. Rowling', pais: 'Reino Unido' }
+];
+let idCounter = 3;
+
+// ...existing code...
 
 export function getAll() {
   return autores;

@@ -1,4 +1,7 @@
-let livros = [];
+let livros = [
+  { isbn: '9788535914849', titulo: 'Dom Casmurro', autorId: 1, disponivel: true },
+  { isbn: '9780439139601', titulo: 'Harry Potter e o Prisioneiro de Azkaban', autorId: 2, disponivel: true }
+];
 
 export function getAll() {
   return livros;

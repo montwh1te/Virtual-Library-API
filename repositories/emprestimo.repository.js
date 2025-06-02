@@ -1,5 +1,15 @@
-let emprestimos = [];
-let idCounter = 1;
+let emprestimos = [
+  {
+    id: 1,
+    matriculaCliente: '20230001',
+    isbnLivro: '9788535914849',
+    dataRetirada: '2024-06-01',
+    dataPrevistaDevolucao: '2024-06-08',
+    dataDevolucao: null,
+    diasAtraso: null
+  }
+];
+let idCounter = 2;
 
 export function getAll() {
   return emprestimos;
