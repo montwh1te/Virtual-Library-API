@@ -1,0 +1,17 @@
+{
+  "name": "trabalho1_des_api",
+  "version": "1.0.0",
+  "description": "Primeiro trabalho da disciplina de Desenvolvimento de Serviços e API",
+  "main": "app.js",
+  "type": "module",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "keywords": [],
+  "author": "montwh1te",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^5.1.0"
+  }
+}
