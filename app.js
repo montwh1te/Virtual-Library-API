@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import authRoutes from './routes/auth.routes.js';
@@ -9,7 +10,6 @@ import { realizaLog } from './middleware/logger_middleware.js'
 import { autenticar } from './middleware/auth.middleware.js'
 
 const app = express()
-const port = 3000
 
 // Config da API
 app.use(express.json())
@@ -31,6 +31,6 @@ app.get('/', (req, res) => res.send('API Biblioteca rodando!'));
 export default app;
 
 const PORT = process.env.PORT || 3000;
-app.listen(port, () => {
-  console.log(`API running on port ${port}`)
+app.listen(PORT, () => {
+  console.log(`API running on port ${PORT}`)
 })
