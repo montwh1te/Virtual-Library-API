@@ -1,7 +1,15 @@
 import * as livroRepository from '../../repositories/livro.repository.js';
+import * as autorRepository from '../../repositories/autor.repository.js';
 
 describe('Livro Repository', () => {
-  const isbn = '1111111111111';
+  const isbn = '9999999999999';
+  let autorId;
+
+  beforeAll(async () => {
+    // Cria um autor para associar ao livro
+    const autor = await autorRepository.create({ nome: 'Autor do Livro', pais: 'Brasil' });
+    autorId = autor.id;
+  });
 
   it('getAll deve retornar um array', async () => {
     const livros = await livroRepository.getAll();
@@ -11,8 +19,8 @@ describe('Livro Repository', () => {
   it('create deve adicionar um novo livro', async () => {
     const livro = {
       isbn,
-      titulo: 'Repo Teste',
-      autorId: 1,
+      titulo: 'Livro Repo',
+      autorId,
       disponivel: true
     };
     const criado = await livroRepository.create(livro);
@@ -26,8 +34,13 @@ describe('Livro Repository', () => {
   });
 
   it('update deve atualizar um livro existente', async () => {
-    const atualizado = await livroRepository.update(isbn, { titulo: 'Atualizado Repo' });
-    expect(atualizado.titulo).toBe('Atualizado Repo');
+    const atualizado = await livroRepository.update(isbn, {
+      titulo: 'Livro Atualizado',
+      autorId,
+      disponivel: false
+    });
+    expect(atualizado.titulo).toBe('Livro Atualizado');
+    expect(atualizado.disponivel).toBe(false);
   });
 
   it('remove deve excluir o livro', async () => {

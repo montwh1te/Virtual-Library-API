@@ -3,33 +3,33 @@ import * as autorRepository from '../../repositories/autor.repository.js';
 describe('Autor Repository', () => {
   let autorCriado;
 
-  it('getAll deve retornar um array', async () => {
+  it('deve listar todos os autores', async () => {
     const autores = await autorRepository.getAll();
     expect(Array.isArray(autores)).toBe(true);
   });
 
-  it('create deve adicionar um novo autor', async () => {
-    const autor = {
-      nome: 'Autor Repo Teste',
-      pais: 'Brasil'
-    };
-    autorCriado = await autorRepository.create(autor);
-    expect(autorCriado).toMatchObject(autor);
+  it('deve criar um novo autor', async () => {
+    const novoAutor = { nome: 'Repo Teste', pais: 'Brasil' };
+    autorCriado = await autorRepository.create(novoAutor);
+
     expect(autorCriado).toHaveProperty('id');
+    expect(autorCriado.nome).toBe(novoAutor.nome);
+    expect(autorCriado.pais).toBe(novoAutor.pais);
   });
 
-  it('getById deve retornar o autor criado', async () => {
+  it('deve buscar um autor por ID', async () => {
     const autor = await autorRepository.getById(autorCriado.id);
     expect(autor).toBeDefined();
     expect(autor.id).toBe(autorCriado.id);
   });
 
-  it('update deve atualizar um autor existente', async () => {
-    const atualizado = await autorRepository.update(autorCriado.id, { nome: 'Autor Atualizado' });
-    expect(atualizado.nome).toBe('Autor Atualizado');
+  it('deve atualizar um autor existente', async () => {
+    const atualizacao = { nome: 'Nome Atualizado', pais: 'Brasil' };
+    const atualizado = await autorRepository.update(autorCriado.id, atualizacao);
+    expect(atualizado.nome).toBe('Nome Atualizado');
   });
 
-  it('remove deve excluir o autor', async () => {
+  it('deve remover o autor', async () => {
     await autorRepository.remove(autorCriado.id);
     const autor = await autorRepository.getById(autorCriado.id);
     expect(autor).toBeUndefined();

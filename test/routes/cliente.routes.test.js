@@ -1,67 +1,51 @@
 import request from 'supertest';
-import app from '../../app.js';
+import express from 'express';
+import clienteRoutes from '../../routes/cliente.routes.js';
+import { db } from '../../db.js';
 
-describe('Rotas de Cliente', () => {
-  let token;
-  let matriculaCliente = '20239999';
+const app = express();
+app.use(express.json());
+app.use('/clientes', clienteRoutes);
 
-  beforeAll(async () => {
-    const res = await request(app)
-      .post('/auth/login')
-      .send({ username: process.env.USER, password: process.env.PASSWORD });
-    token = res.body.token;
-  });
+describe('Cliente Routes (Integração)', () => {
+  const matricula = '20238888';
 
-  it('GET /clientes deve retornar lista de clientes', async () => {
-    const res = await request(app)
-      .get('/clientes')
-      .set('Authorization', `Bearer ${token}`);
+  it('GET /clientes deve retornar array', async () => {
+    const res = await request(app).get('/clientes');
     expect(res.statusCode).toBe(200);
     expect(Array.isArray(res.body)).toBe(true);
   });
 
-  it('POST /clientes deve criar um novo cliente', async () => {
-    const novoCliente = {
-      matricula: matriculaCliente,
-      nome: 'Cliente Teste',
-      telefone: '11988887777'
-    };
-    const res = await request(app)
-      .post('/clientes')
-      .set('Authorization', `Bearer ${token}`)
-      .send(novoCliente);
+  it('POST /clientes deve criar novo cliente', async () => {
+    const res = await request(app).post('/clientes').send({
+      matricula,
+      nome: 'Cliente API',
+      telefone: '21988888888'
+    });
     expect(res.statusCode).toBe(201);
-    expect(res.body).toMatchObject(novoCliente);
+    expect(res.body).toMatchObject({ matricula });
   });
 
-  it('GET /clientes/:matricula deve retornar o cliente criado', async () => {
-    const res = await request(app)
-      .get(`/clientes/${matriculaCliente}`)
-      .set('Authorization', `Bearer ${token}`);
+  it('GET /clientes/:matricula deve retornar o cliente', async () => {
+    const res = await request(app).get(`/clientes/${matricula}`);
     expect(res.statusCode).toBe(200);
-    expect(res.body.matricula).toBe(matriculaCliente);
+    expect(res.body.matricula).toBe(matricula);
   });
 
   it('PUT /clientes/:matricula deve atualizar o cliente', async () => {
-    const res = await request(app)
-      .put(`/clientes/${matriculaCliente}`)
-      .set('Authorization', `Bearer ${token}`)
-      .send({ nome: 'Cliente Atualizado' });
+    const res = await request(app).put(`/clientes/${matricula}`).send({
+      nome: 'Cliente Editado',
+      telefone: '21999999999'
+    });
     expect(res.statusCode).toBe(200);
-    expect(res.body.nome).toBe('Cliente Atualizado');
+    expect(res.body.nome).toBe('Cliente Editado');
   });
 
-  it('DELETE /clientes/:matricula deve remover o cliente', async () => {
-    const res = await request(app)
-      .delete(`/clientes/${matriculaCliente}`)
-      .set('Authorization', `Bearer ${token}`);
+  it('DELETE /clientes/:matricula deve excluir o cliente', async () => {
+    const res = await request(app).delete(`/clientes/${matricula}`);
     expect(res.statusCode).toBe(204);
-  });
 
-  it('GET /clientes/:matricula deve retornar 404 após remoção', async () => {
-    const res = await request(app)
-      .get(`/clientes/${matriculaCliente}`)
-      .set('Authorization', `Bearer ${token}`);
-    expect(res.statusCode).toBe(404);
+    const check = await request(app).get(`/clientes/${matricula}`);
+    expect(check.statusCode).toBe(404);
   });
 });

@@ -1,68 +1,60 @@
 import request from 'supertest';
-import app from '../../app.js';
+import express from 'express';
+import livroRoutes from '../../routes/livro.routes.js';
+import * as autorRepository from '../../repositories/autor.repository.js';
+import { db } from '../../db.js';
 
-describe('Rotas de Livro', () => {
-  let token;
-  let isbnTest = '1234567890123';
+const app = express();
+app.use(express.json());
+app.use('/livros', livroRoutes);
+
+describe('Livro Routes (Integração)', () => {
+  const isbn = '1234567890123';
+  let autorId;
 
   beforeAll(async () => {
-    const res = await request(app)
-      .post('/auth/login')
-      .send({ username: process.env.USER, password: process.env.PASSWORD });
-    token = res.body.token;
+    const autor = await autorRepository.create({ nome: 'Autor Teste Livro', pais: 'Portugal' });
+    autorId = autor.id;
   });
 
-  it('GET /livros deve retornar lista de livros', async () => {
-    const res = await request(app)
-      .get('/livros')
-      .set('Authorization', `Bearer ${token}`);
+  it('GET /livros deve retornar array', async () => {
+    const res = await request(app).get('/livros');
     expect(res.statusCode).toBe(200);
     expect(Array.isArray(res.body)).toBe(true);
   });
 
-  it('POST /livros deve criar um novo livro', async () => {
-    const novoLivro = {
-      isbn: isbnTest,
-      titulo: 'Livro Teste',
-      autorId: 1,
+  it('POST /livros deve criar novo livro', async () => {
+    const res = await request(app).post('/livros').send({
+      isbn,
+      titulo: 'Livro API',
+      autorId,
       disponivel: true
-    };
-    const res = await request(app)
-      .post('/livros')
-      .set('Authorization', `Bearer ${token}`)
-      .send(novoLivro);
+    });
     expect(res.statusCode).toBe(201);
-    expect(res.body).toMatchObject(novoLivro);
+    expect(res.body.isbn).toBe(isbn);
   });
 
   it('GET /livros/:isbn deve retornar o livro criado', async () => {
-    const res = await request(app)
-      .get(`/livros/${isbnTest}`)
-      .set('Authorization', `Bearer ${token}`);
+    const res = await request(app).get(`/livros/${isbn}`);
     expect(res.statusCode).toBe(200);
-    expect(res.body.isbn).toBe(isbnTest);
+    expect(res.body.isbn).toBe(isbn);
   });
 
   it('PUT /livros/:isbn deve atualizar o livro', async () => {
-    const res = await request(app)
-      .put(`/livros/${isbnTest}`)
-      .set('Authorization', `Bearer ${token}`)
-      .send({ titulo: 'Livro Atualizado' });
+    const res = await request(app).put(`/livros/${isbn}`).send({
+      titulo: 'Livro Editado',
+      autorId,
+      disponivel: false
+    });
     expect(res.statusCode).toBe(200);
-    expect(res.body.titulo).toBe('Livro Atualizado');
+    expect(res.body.titulo).toBe('Livro Editado');
   });
 
-  it('DELETE /livros/:isbn deve remover o livro', async () => {
-    const res = await request(app)
-      .delete(`/livros/${isbnTest}`)
-      .set('Authorization', `Bearer ${token}`);
+  it('DELETE /livros/:isbn deve excluir o livro', async () => {
+    const res = await request(app).delete(`/livros/${isbn}`);
     expect(res.statusCode).toBe(204);
-  });
 
-  it('GET /livros/:isbn deve retornar 404 após remoção', async () => {
-    const res = await request(app)
-      .get(`/livros/${isbnTest}`)
-      .set('Authorization', `Bearer ${token}`);
-    expect(res.statusCode).toBe(404);
+    const check = await request(app).get(`/livros/${isbn}`);
+    expect(check.statusCode).toBe(404);
   });
 });

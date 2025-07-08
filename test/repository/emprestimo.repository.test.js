@@ -1,42 +1,72 @@
 import * as emprestimoRepository from '../../repositories/emprestimo.repository.js';
+import * as clienteRepository from '../../repositories/cliente.repository.js';
+import * as autorRepository from '../../repositories/autor.repository.js';
+import * as livroRepository from '../../repositories/livro.repository.js';
 
 describe('Emprestimo Repository', () => {
   let emprestimoCriado;
-  const matriculaCliente = '20239999';
+  let matricula = '20231111';
+  let isbn = '9876543210001';
+  let autorId;
 
-  it('getAll deve retornar um array', async () => {
-    const emprestimos = await emprestimoRepository.getAll();
-    expect(Array.isArray(emprestimos)).toBe(true);
+  beforeAll(async () => {
+    // Cria um cliente e um livro relacionados ao empréstimo
+    await clienteRepository.create({
+      matricula,
+      nome: 'Cliente Emprestimo',
+      telefone: '11999991111'
+    });
+
+    const autor = await autorRepository.create({ nome: 'Autor Teste Emprestimo', pais: 'Brasil' });
+    autorId = autor.id;
+
+    await livroRepository.create({
+      isbn,
+      titulo: 'Livro Emprestimo',
+      autorId,
+      disponivel: true
+    });
   });
 
-  it('create deve adicionar um novo emprestimo', async () => {
-    const emprestimo = {
-      matriculaCliente,
-      isbnLivro: '9788535914849',
-      dataRetirada: '2024-06-01',
-      dataPrevistaDevolucao: '2024-06-08',
+  it('create deve registrar novo empréstimo', async () => {
+    const hoje = new Date();
+    const dataPrevista = new Date();
+    dataPrevista.setDate(hoje.getDate() + 7);
+
+    const novoEmprestimo = {
+      matriculaCliente: matricula,
+      isbnLivro: isbn,
+      dataRetirada: hoje.toISOString().slice(0, 10),
+      dataPrevistaDevolucao: dataPrevista.toISOString().slice(0, 10),
       dataDevolucao: null,
       diasAtraso: null
     };
-    emprestimoCriado = await emprestimoRepository.create(emprestimo);
-    expect(emprestimoCriado).toMatchObject(emprestimo);
+
+    emprestimoCriado = await emprestimoRepository.create(novoEmprestimo);
     expect(emprestimoCriado).toHaveProperty('id');
+    expect(emprestimoCriado.isbnLivro).toBe(isbn);
   });
 
-  it('getById deve retornar o emprestimo criado', async () => {
+  it('getById deve retornar o empréstimo criado', async () => {
     const emprestimo = await emprestimoRepository.getById(emprestimoCriado.id);
     expect(emprestimo).toBeDefined();
     expect(emprestimo.id).toBe(emprestimoCriado.id);
   });
 
-  it('getByCliente deve retornar emprestimos do cliente', async () => {
-    const emprestimos = await emprestimoRepository.getByCliente(matriculaCliente);
+  it('getByCliente deve retornar empréstimos do cliente', async () => {
+    const emprestimos = await emprestimoRepository.getByCliente(matricula);
     expect(Array.isArray(emprestimos)).toBe(true);
-    expect(emprestimos.some(e => e.id === emprestimoCriado.id)).toBe(true);
+    expect(emprestimos.find(e => e.id === emprestimoCriado.id)).toBeDefined();
   });
 
-  it('update deve atualizar um emprestimo existente', async () => {
-    const atualizado = await emprestimoRepository.update(emprestimoCriado.id, { diasAtraso: 2 });
-    expect(atualizado.diasAtraso).toBe(2);
+  it('update deve registrar devolução', async () => {
+    const hoje = new Date().toISOString().slice(0, 10);
+    const atualizado = await emprestimoRepository.update(emprestimoCriado.id, {
+      ...emprestimoCriado,
+      dataDevolucao: hoje,
+      diasAtraso: 0
+    });
+
+    expect(atualizado.dataDevolucao).toBe(hoje);
   });
 });

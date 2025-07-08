@@ -1,7 +1,12 @@
 import * as clienteRepository from '../../repositories/cliente.repository.js';
 
 describe('Cliente Repository', () => {
-  const matricula = '20238888';
+  const matricula = '20239999';
+  const mockCliente = {
+    matricula,
+    nome: 'Cliente Repo',
+    telefone: '11988887777'
+  };
 
   it('getAll deve retornar um array', async () => {
     const clientes = await clienteRepository.getAll();
@@ -9,23 +14,25 @@ describe('Cliente Repository', () => {
   });
 
   it('create deve adicionar um novo cliente', async () => {
-    const cliente = {
-      matricula,
-      nome: 'Cliente Repo',
-      telefone: '11999998888'
-    };
-    const criado = await clienteRepository.create(cliente);
-    expect(criado).toMatchObject(cliente);
-    const buscado = await clienteRepository.getByMatricula(matricula);
-    expect(buscado).toBeDefined();
+    const criado = await clienteRepository.create(mockCliente);
+    expect(criado).toMatchObject(mockCliente);
   });
 
-  it('update deve atualizar um cliente', async () => {
-    const atualizado = await clienteRepository.update(matricula, { nome: 'Atualizado Repo' });
-    expect(atualizado.nome).toBe('Atualizado Repo');
+  it('getByMatricula deve retornar o cliente criado', async () => {
+    const cliente = await clienteRepository.getByMatricula(matricula);
+    expect(cliente).toBeDefined();
+    expect(cliente.nome).toBe('Cliente Repo');
   });
 
-  it('remove deve excluir um cliente', async () => {
+  it('update deve atualizar um cliente existente', async () => {
+    const atualizado = await clienteRepository.update(matricula, {
+      nome: 'Cliente Atualizado',
+      telefone: '11999999999'
+    });
+    expect(atualizado.nome).toBe('Cliente Atualizado');
+  });
+
+  it('remove deve excluir o cliente', async () => {
     await clienteRepository.remove(matricula);
     const cliente = await clienteRepository.getByMatricula(matricula);
     expect(cliente).toBeUndefined();

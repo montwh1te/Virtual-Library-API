@@ -1,7 +1,7 @@
 {
   "name": "trabalho1_des_api",
   "version": "1.0.0",
-  "description": "Primeiro trabalho da disciplina de Desenvolvimento de Serviços e API",
+  "description": "Segundo trabalho da disciplina de Desenvolvimento de Serviços e API",
   "main": "app.js",
   "type": "module",
   "scripts": {
@@ -10,7 +10,8 @@
     "test:watch": "node --experimental-vm-modules node_modules/jest/bin/jest.js --watch",
     "test:coverage": "node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage",
     "migrate": "node scripts/migrate.js",
-    "seed": "node scripts/seed.js"
+    "seed": "node scripts/seed.js",
+    "cleanDb": "node scripts/cleanDb.js"
   },
   "keywords": [],
   "author": "montwh1te",

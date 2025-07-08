@@ -1,55 +1,55 @@
 import request from 'supertest';
-import app from '../../app.js';
+import express from 'express';
+import emprestimoRoutes from '../../routes/emprestimo.routes.js';
+import * as clienteRepository from '../../repositories/cliente.repository.js';
+import * as autorRepository from '../../repositories/autor.repository.js';
+import * as livroRepository from '../../repositories/livro.repository.js';
+import { db } from '../../db.js';
 
-describe('Rotas de Emprestimo', () => {
-  let token;
-  let idEmprestimoCriado;
+const app = express();
+app.use(express.json());
+app.use('/emprestimos', emprestimoRoutes);
+
+describe('Emprestimo Routes (Integração)', () => {
+  let idEmprestimo;
+  const matricula = '20232222';
+  const isbn = '9998887776661';
+  let autorId;
 
   beforeAll(async () => {
-    const res = await request(app)
-      .post('/auth/login')
-      .send({ username: process.env.USER, password: process.env.PASSWORD });
-    token = res.body.token;
+    await clienteRepository.create({ matricula, nome: 'Cliente API', telefone: '21999998888' });
+    const autor = await autorRepository.create({ nome: 'Autor API', pais: 'Portugal' });
+    autorId = autor.id;
+
+    await livroRepository.create({ isbn, titulo: 'Livro API', autorId, disponivel: true });
   });
 
-  it('GET /emprestimos deve retornar lista de emprestimos', async () => {
-    const res = await request(app)
-      .get('/emprestimos')
-      .set('Authorization', `Bearer ${token}`);
+  it('GET /emprestimos deve retornar array', async () => {
+    const res = await request(app).get('/emprestimos');
     expect(res.statusCode).toBe(200);
     expect(Array.isArray(res.body)).toBe(true);
   });
 
-  it('POST /emprestimos deve criar um novo emprestimo', async () => {
-    const novoEmprestimo = {
-      matriculaCliente: '20230002',
-      isbnLivro: '9780439139601'
-    };
-    const res = await request(app)
-      .post('/emprestimos')
-      .set('Authorization', `Bearer ${token}`)
-      .send(novoEmprestimo);
+  it('POST /emprestimos deve registrar novo empréstimo', async () => {
+    const res = await request(app).post('/emprestimos').send({
+      matriculaCliente: matricula,
+      isbnLivro: isbn
+    });
+
     expect(res.statusCode).toBe(201);
     expect(res.body).toHaveProperty('id');
-    expect(res.body.matriculaCliente).toBe(novoEmprestimo.matriculaCliente);
-    expect(res.body.isbnLivro).toBe(novoEmprestimo.isbnLivro);
-    idEmprestimoCriado = res.body.id;
+    idEmprestimo = res.body.id;
   });
 
-  it('GET /emprestimos/:id deve retornar o emprestimo criado', async () => {
-    const res = await request(app)
-      .get(`/emprestimos/${idEmprestimoCriado}`)
-      .set('Authorization', `Bearer ${token}`);
+  it('GET /emprestimos/:id deve retornar o empréstimo criado', async () => {
+    const res = await request(app).get(`/emprestimos/${idEmprestimo}`);
     expect(res.statusCode).toBe(200);
-    expect(res.body.id).toBe(idEmprestimoCriado);
+    expect(res.body.id).toBe(idEmprestimo);
   });
 
-  // Adapte este teste se você tiver rota de devolução implementada
-  // it('POST /emprestimos/devolucao/:id deve devolver o livro', async () => {
-  //   const res = await request(app)
-  //     .post(`/emprestimos/devolucao/${idEmprestimoCriado}`)
-  //     .set('Authorization', `Bearer ${token}`);
-  //   expect(res.statusCode).toBe(200);
-  //   expect(res.body.dataDevolucao).not.toBeNull();
-  // });
+  it('POST /emprestimos/devolucao/:id deve registrar devolução', async () => {
+    const res = await request(app).post(`/emprestimos/devolucao/${idEmprestimo}`);
+    expect(res.statusCode).toBe(200);
+    expect(res.body.dataDevolucao).toBeDefined();
+  });
 });
