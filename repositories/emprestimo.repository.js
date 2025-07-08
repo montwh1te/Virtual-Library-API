@@ -1,37 +1,62 @@
-let emprestimos = [
-  {
-    id: 1,
-    matriculaCliente: '20230001',
-    isbnLivro: '9788535914849',
-    dataRetirada: '2024-06-01',
-    dataPrevistaDevolucao: '2024-06-08',
-    dataDevolucao: null,
-    diasAtraso: null
-  }
-];
-let idCounter = 2;
+import { db } from '../db.js';
 
-export function getAll() {
-  return emprestimos;
+export async function getAll() {
+  const [rows] = await db.query('SELECT * FROM emprestimos');
+  return rows;
 }
 
-export function getById(id) {
-  return emprestimos.find(e => e.id === Number(id));
+export async function getById(id) {
+  const [rows] = await db.query('SELECT * FROM emprestimos WHERE id = ?', [id]);
+  return rows[0];
 }
 
-export function getByCliente(matriculaCliente) {
-  return emprestimos.filter(e => e.matriculaCliente === matriculaCliente);
+export async function getByCliente(matriculaCliente) {
+  const [rows] = await db.query(
+    'SELECT * FROM emprestimos WHERE matriculaCliente = ?',
+    [matriculaCliente]
+  );
+  return rows;
 }
 
-export function create(data) {
-  const novoEmprestimo = { id: idCounter++, ...data };
-  emprestimos.push(novoEmprestimo);
-  return novoEmprestimo;
+export async function create(data) {
+  const [result] = await db.query(
+    `INSERT INTO emprestimos 
+     (matriculaCliente, isbnLivro, dataRetirada, dataPrevistaDevolucao, dataDevolucao, diasAtraso) 
+     VALUES (?, ?, ?, ?, ?, ?)`,
+    [
+      data.matriculaCliente,
+      data.isbnLivro,
+      data.dataRetirada,
+      data.dataPrevistaDevolucao,
+      data.dataDevolucao ?? null,
+      data.diasAtraso ?? null,
+    ]
+  );
+
+  return { id: result.insertId, ...data };
 }
 
-export function update(id, data) {
-  const index = emprestimos.findIndex(e => e.id === Number(id));
-  if (index === -1) throw new Error('Empréstimo não encontrado');
-  emprestimos[index] = { ...emprestimos[index], ...data };
-  return emprestimos[index];
+export async function update(id, data) {
+  const [result] = await db.query(
+    `UPDATE emprestimos SET 
+      matriculaCliente = ?, 
+      isbnLivro = ?, 
+      dataRetirada = ?, 
+      dataPrevistaDevolucao = ?, 
+      dataDevolucao = ?, 
+      diasAtraso = ? 
+     WHERE id = ?`,
+    [
+      data.matriculaCliente,
+      data.isbnLivro,
+      data.dataRetirada,
+      data.dataPrevistaDevolucao,
+      data.dataDevolucao,
+      data.diasAtraso,
+      id
+    ]
+  );
+
+  if (result.affectedRows === 0) throw new Error('Empréstimo não encontrado');
+  return { id, ...data };
 }

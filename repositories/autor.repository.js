@@ -1,37 +1,34 @@
-let autores = [
-  { id: 1, nome: 'Machado de Assis', pais: 'Brasil' },
-  { id: 2, nome: 'J.K. Rowling', pais: 'Reino Unido' }
-];
-let idCounter = 3;
+import { db } from '../db.js';
 
-// ...existing code...
-
-export function getAll() {
-  return autores;
+export async function getAll() {
+  const [rows] = await db.query('SELECT * FROM autores');
+  return rows;
 }
 
-export function getById(id) {
-  return autores.find(autor => autor.id === Number(id));
+export async function getById(id) {
+  const [rows] = await db.query('SELECT * FROM autores WHERE id = ?', [id]);
+  return rows[0];
 }
 
-export function create(data) {
-  if (!data.nome || !data.pais) {
-    throw new Error('Nome e país são obrigatórios');
-  }
-  const novoAutor = { id: idCounter++, ...data };
-  autores.push(novoAutor);
-  return novoAutor;
+export async function create(data) {
+  if (!data.nome || !data.pais) throw new Error('Nome e país são obrigatórios');
+  const [result] = await db.query(
+    'INSERT INTO autores (nome, pais) VALUES (?, ?)',
+    [data.nome, data.pais]
+  );
+  return { id: result.insertId, ...data };
 }
 
-export function update(id, data) {
-  const index = autores.findIndex(autor => autor.id === Number(id));
-  if (index === -1) throw new Error('Autor não encontrado');
-  autores[index] = { ...autores[index], ...data };
-  return autores[index];
+export async function update(id, data) {
+  const [result] = await db.query(
+    'UPDATE autores SET nome = ?, pais = ? WHERE id = ?',
+    [data.nome, data.pais, id]
+  );
+  if (result.affectedRows === 0) throw new Error('Autor não encontrado');
+  return { id, ...data };
 }
 
-export function remove(id) {
-  const index = autores.findIndex(autor => autor.id === Number(id));
-  if (index === -1) throw new Error('Autor não encontrado');
-  autores.splice(index, 1);
+export async function remove(id) {
+  const [result] = await db.query('DELETE FROM autores WHERE id = ?', [id]);
+  if (result.affectedRows === 0) throw new Error('Autor não encontrado');
 }

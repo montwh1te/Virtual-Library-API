@@ -1,36 +1,42 @@
-let clientes = [
-  { matricula: '20230001', nome: 'João Silva', telefone: '11999999999' },
-  { matricula: '20230002', nome: 'Maria Souza', telefone: '21988888888' }
-];
+import { db } from '../db.js';
 
-export function getAll() {
-  return clientes;
+export async function getAll() {
+  const [rows] = await db.query('SELECT * FROM clientes');
+  return rows;
 }
 
-export function getByMatricula(matricula) {
-  return clientes.find(cliente => cliente.matricula === matricula);
+export async function getByMatricula(matricula) {
+  const [rows] = await db.query('SELECT * FROM clientes WHERE matricula = ?', [matricula]);
+  return rows[0];
 }
 
-export function create(data) {
+export async function create(data) {
   if (!data.matricula || !data.nome || !data.telefone) {
     throw new Error('Matrícula, nome e telefone são obrigatórios');
   }
-  if (getByMatricula(data.matricula)) {
-    throw new Error('Cliente já cadastrado');
-  }
-  clientes.push(data);
+
+  const existing = await getByMatricula(data.matricula);
+  if (existing) throw new Error('Cliente já cadastrado');
+
+  await db.query(
+    'INSERT INTO clientes (matricula, nome, telefone) VALUES (?, ?, ?)',
+    [data.matricula, data.nome, data.telefone]
+  );
+
   return data;
 }
 
-export function update(matricula, data) {
-  const index = clientes.findIndex(cliente => cliente.matricula === matricula);
-  if (index === -1) throw new Error('Cliente não encontrado');
-  clientes[index] = { ...clientes[index], ...data };
-  return clientes[index];
+export async function update(matricula, data) {
+  const [result] = await db.query(
+    'UPDATE clientes SET nome = ?, telefone = ? WHERE matricula = ?',
+    [data.nome, data.telefone, matricula]
+  );
+
+  if (result.affectedRows === 0) throw new Error('Cliente não encontrado');
+  return { matricula, ...data };
 }
 
-export function remove(matricula) {
-  const index = clientes.findIndex(cliente => cliente.matricula === matricula);
-  if (index === -1) throw new Error('Cliente não encontrado');
-  clientes.splice(index, 1);
+export async function remove(matricula) {
+  const [result] = await db.query('DELETE FROM clientes WHERE matricula = ?', [matricula]);
+  if (result.affectedRows === 0) throw new Error('Cliente não encontrado');
 }
