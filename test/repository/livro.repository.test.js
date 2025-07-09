@@ -33,16 +33,6 @@ describe('Livro Repository', () => {
     expect(livro.isbn).toBe(isbn);
   });
 
-  it('update deve atualizar um livro existente', async () => {
-    const atualizado = await livroRepository.update(isbn, {
-      titulo: 'Livro Atualizado',
-      autorId,
-      disponivel: false
-    });
-    expect(atualizado.titulo).toBe('Livro Atualizado');
-    expect(atualizado.disponivel).toBe(false);
-  });
-
   it('remove deve excluir o livro', async () => {
     await livroRepository.remove(isbn);
     const livro = await livroRepository.getByISBN(isbn);

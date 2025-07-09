@@ -7,7 +7,7 @@ const cleanDb = async () => {
     await db.query('DELETE FROM clientes');
     await db.query('DELETE FROM autores');
 
-    console.log('✅ Migrations executadas com sucesso!');
+    console.log('✅ Banco resetado com sucesso!');
     process.exit();
 }
 

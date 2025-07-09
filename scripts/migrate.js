@@ -23,7 +23,7 @@ async function migrate() {
       titulo VARCHAR(255) NOT NULL,
       autorId INT NOT NULL,
       disponivel BOOLEAN DEFAULT TRUE,
-      FOREIGN KEY (autorId) REFERENCES autores(id)
+      FOREIGN KEY (autorId) REFERENCES autores(id) ON DELETE CASCADE
     );
   `);
 
@@ -36,8 +36,8 @@ async function migrate() {
       dataPrevistaDevolucao DATE,
       dataDevolucao DATE,
       diasAtraso INT,
-      FOREIGN KEY (matriculaCliente) REFERENCES clientes(matricula),
-      FOREIGN KEY (isbnLivro) REFERENCES livros(isbn)
+      FOREIGN KEY (matriculaCliente) REFERENCES clientes(matricula) ON DELETE CASCADE,
+      FOREIGN KEY (isbnLivro) REFERENCES livros(isbn) ON DELETE CASCADE
     );
   `);
 

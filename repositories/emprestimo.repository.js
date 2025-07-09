@@ -6,7 +6,33 @@ export async function getAll() {
 }
 
 export async function getById(id) {
-  const [rows] = await db.query('SELECT * FROM emprestimos WHERE id = ?', [id]);
+  const [rows] = await db.query(`
+    SELECT 
+      e.id,
+      e.dataRetirada,
+      e.dataPrevistaDevolucao,
+      e.dataDevolucao,
+      e.diasAtraso,
+      
+      c.matricula AS clienteMatricula,
+      c.nome AS clienteNome,
+      c.telefone AS clienteTelefone,
+      
+      l.isbn AS livroIsbn,
+      l.titulo AS livroTitulo,
+      l.disponivel AS livroDisponivel,
+      
+      a.id AS autorId,
+      a.nome AS autorNome,
+      a.pais AS autorPais
+      
+    FROM emprestimos e
+    JOIN clientes c ON e.matriculaCliente = c.matricula
+    JOIN livros l ON e.isbnLivro = l.isbn
+    JOIN autores a ON l.autorId = a.id
+    WHERE e.id = ?
+  `, [id]);
+
   return rows[0];
 }
 

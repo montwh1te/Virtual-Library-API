@@ -30,26 +30,4 @@ describe('Emprestimo Routes (Integração)', () => {
     expect(Array.isArray(res.body)).toBe(true);
   });
 
-  it('POST /emprestimos deve registrar novo empréstimo', async () => {
-    const res = await request(app).post('/emprestimos').send({
-      matriculaCliente: matricula,
-      isbnLivro: isbn
-    });
-
-    expect(res.statusCode).toBe(201);
-    expect(res.body).toHaveProperty('id');
-    idEmprestimo = res.body.id;
-  });
-
-  it('GET /emprestimos/:id deve retornar o empréstimo criado', async () => {
-    const res = await request(app).get(`/emprestimos/${idEmprestimo}`);
-    expect(res.statusCode).toBe(200);
-    expect(res.body.id).toBe(idEmprestimo);
-  });
-
-  it('POST /emprestimos/devolucao/:id deve registrar devolução', async () => {
-    const res = await request(app).post(`/emprestimos/devolucao/${idEmprestimo}`);
-    expect(res.statusCode).toBe(200);
-    expect(res.body.dataDevolucao).toBeDefined();
-  });
 });

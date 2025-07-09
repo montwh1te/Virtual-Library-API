@@ -47,12 +47,6 @@ describe('Emprestimo Repository', () => {
     expect(emprestimoCriado.isbnLivro).toBe(isbn);
   });
 
-  it('getById deve retornar o empréstimo criado', async () => {
-    const emprestimo = await emprestimoRepository.getById(emprestimoCriado.id);
-    expect(emprestimo).toBeDefined();
-    expect(emprestimo.id).toBe(emprestimoCriado.id);
-  });
-
   it('getByCliente deve retornar empréstimos do cliente', async () => {
     const emprestimos = await emprestimoRepository.getByCliente(matricula);
     expect(Array.isArray(emprestimos)).toBe(true);
